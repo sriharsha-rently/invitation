@@ -628,11 +628,6 @@ body{overflow-wrap:break-word}
 .reveal{backface-visibility:hidden}
 /* map placeholder: nothing heavy loads until the guest asks for it */
 .map{position:relative}
-.map-ph{position:absolute;inset:8px;border:0;border-radius:18px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
-  background:radial-gradient(circle at 50% 40%,#fffaf0,#f7e6c2);color:var(--maroon);font:inherit;transition:opacity .4s}
-.map-ph svg{width:44px;height:44px;color:#b8862b}
-.map-ph .t{font-size:20px}
-.map-ph.gone{opacity:0;pointer-events:none}
 </style>
 </head>
 <body class="locked">
@@ -762,7 +757,7 @@ body{overflow-wrap:break-word}
         <button class="btn ghost" id="copyAddr" type="button">Copy Address</button>
       </div>
     </div>
-    <div class="map reveal d1"><iframe id="mapFrame" title="Venue map" referrerpolicy="no-referrer-when-downgrade"></iframe><button class="map-ph" id="mapLoad" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 22s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg><span class="t">Sri Sesha Sai Kalyana Vedika</span><span class="btn primary">Show Map</span></button></div>
+    <div class="map reveal d1"><iframe id="mapFrame" title="Venue map" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
   </div>
 </section>
 
@@ -1076,10 +1071,14 @@ $('#cal').innerHTML = [-2,-1,0,1,2].map(k => {
 }).join('');
 
 $$('[data-map]').forEach(a => a.href = mapsLink);
-$('#mapLoad').addEventListener('click', () => {
-  $('#mapFrame').src = 'https://maps.google.com/maps?q=' + encodeURIComponent(CONFIG.venue.mapQuery) + '&z=16&output=embed';
-  $('#mapLoad').classList.add('gone');
-});
+// map: always shown; loaded in the background shortly after the page opens so it never loads mid-scroll
+function loadMap(){
+  const f = $('#mapFrame'); if (f.src) return;
+  f.src = 'https://maps.google.com/maps?q=' + encodeURIComponent(CONFIG.venue.mapQuery) + '&z=16&output=embed';
+}
+(window.requestIdleCallback || (fn => setTimeout(fn, 1)))(() => setTimeout(loadMap, 2500));
+// safety net: if someone scrolls there very quickly, load it as it approaches
+new IntersectionObserver((es, o) => { if (es[0].isIntersecting) { loadMap(); o.disconnect(); } }, {rootMargin: '600px 0px'}).observe($('#mapFrame'));
 
 /* ---------------- countdown ---------------- */
 const CIRC = 2 * Math.PI * 54;
