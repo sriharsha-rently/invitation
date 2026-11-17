@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b3d28">
-<title>Kiranmayi & Sriharsha · Wedding Invitation</title>
-<meta name="description" content="You are invited to the wedding of Kiranmayi & Sriharsha — Saturday, 12 December 2026, Sri Sesha Sai Kalyana Vedika, Vijayawada.">
-<meta property="og:title" content="Kiranmayi & Sriharsha · Wedding Invitation">
+<title>Sriharsha & Kiranmayi · Wedding Invitation</title>
+<meta name="description" content="You are invited to the wedding of Sriharsha & Kiranmayi — Saturday, 12 December 2026, Sri Sesha Sai Kalyana Vedika, Vijayawada.">
+<meta property="og:title" content="Sriharsha & Kiranmayi · Wedding Invitation">
 <meta property="og:description" content="Saturday, 12 December 2026 · Muhurtham 8:26 PM · Sri Sesha Sai Kalyana Vedika, Vijayawada">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -407,6 +407,78 @@ button{font:inherit;color:inherit}
   .tap{backdrop-filter:none}
   .spark{animation-duration:4s}
 }
+
+/* =========================================================
+   FIT & ALIGNMENT FIXES
+   ========================================================= */
+body{overflow-wrap:break-word}
+.nm-svg{overflow:hidden;height:1.4em}
+/* door names on three lines */
+.names-small .ln{display:block;line-height:1.05}
+.names-small .amp-s{font-size:.6em;margin:2px 0}
+/* signature on three lines */
+.signature span{display:block;line-height:1.1}
+.signature .a{font-size:.6em}
+/* Telugu blessing wraps gracefully */
+.blessing{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:.15em .55em}
+.blessing span{white-space:nowrap}
+.blessing i{font-style:normal;color:var(--gold)}
+/* location pins */
+.pin{width:.95em;height:.95em;flex:none;color:#b8862b}
+.event .place{display:inline-flex;align-items:center;gap:7px}
+.venue-name{display:flex!important;align-items:center;gap:10px;justify-content:center}
+.venue-name .pin{width:.8em;height:.8em}
+.venue-name span{-webkit-background-clip:text;background-clip:text;background-image:var(--green-grad);color:transparent}
+@media (min-width:900px){.venue-name{justify-content:flex-start}}
+/* monograms centred in their circles */
+.portrait .mono-m{inset:0;display:grid;place-items:center;padding:6%}
+.portrait .mono-m svg{display:block;width:100%;height:auto}
+.portrait .mono{display:flex;align-items:center;justify-content:center;line-height:1;padding-top:.08em}
+.seal span{display:flex;align-items:center;justify-content:center;margin-top:0;line-height:1;padding-top:.1em}
+/* small phones: keep everything inside the frames */
+@media (max-width:430px){
+
+  .hero-card .lead{font-size:12px;letter-spacing:.14em}
+  .date-band{gap:10px}
+  .date-band .side{font-size:11px;letter-spacing:.14em}
+  .date-band .num{font-size:56px}
+  .venue-line{font-size:17px}
+
+  .cd-date{padding:10px 16px}
+}
+
+/* keep text clear of the gold arch lines (frame sits ~36px inside the card edge) */
+.hero-card,.event{padding-left:max(46px,6vw);padding-right:max(46px,6vw)}
+@media (min-width:600px){.hero-card{padding-left:60px;padding-right:60px}}
+.seal span{font-size:32px;letter-spacing:-.02em}
+
+/* =========================================================
+   MONOGRAMS (exactly centred)
+   ========================================================= */
+.mono-box{position:absolute;inset:0}
+.mono-box svg{display:block;width:100%;height:100%;overflow:visible}
+.seal .mono-box{inset:0}
+.portrait .mono-m{opacity:1}
+.mono-wrap{position:relative;width:100%;aspect-ratio:1}
+.mono-wrap > svg{position:absolute;inset:0;width:100%;height:100%;color:var(--rani);opacity:.35}
+
+/* =========================================================
+   COUPLE NAMES (single line, or 3 lines with a centred &)
+   ========================================================= */
+.couple{display:flex!important;flex-direction:column;align-items:stretch;gap:var(--cp-gap,0px);padding:0!important;background:none!important;-webkit-text-fill-color:initial}
+.couple .cp-line{display:block;width:100%;overflow:visible}
+.cp-line text{font-family:var(--script);font-weight:400;white-space:pre}
+.hero-card{width:min(720px,100%)}
+.hero-card .names{margin-top:14px}
+.names-small.couple{width:min(88vw,620px);margin-bottom:22px}
+.signature.couple{width:100%;max-width:560px;margin:24px auto 0!important}
+@media (min-width:900px){.story .signature.couple{margin-left:0!important}}
+.closing .names.couple{flex:1 1 auto;max-width:640px}
+
+/* Our Story monogram: mandala + S&K sit at the exact centre of the arch frame */
+.portrait .in{display:block}
+.portrait .mono-m{position:absolute;inset:0;padding:0;display:flex;align-items:center;justify-content:center}
+.portrait .mono-wrap{width:88%;flex:none}
 </style>
 </head>
 <body class="locked">
@@ -437,8 +509,8 @@ button{font:inherit;color:inherit}
   <div class="intro-center">
     <div class="tel">శుభ వివాహం</div>
     <div class="sub">SHUBHA VIVAHAM</div>
-    <div class="seal"><span data-bind="initials"></span></div>
-    <div class="names-small"><span data-bind="bride"></span> &amp; <span data-bind="groom"></span></div>
+    <div class="seal"><div class="mono-box" id="sealMono"></div></div>
+    <div class="names-small couple" data-fill="#ffffff" data-amp="#f4d98c" data-min="26"></div>
     <div class="tap">TAP TO OPEN</div>
   </div>
 </div>
@@ -453,10 +525,10 @@ button{font:inherit;color:inherit}
   <div class="jasmine right" data-jasmine></div>
 
   <div class="hero-card reveal" data-arch>
-    <div class="tel">శ్రీరస్తు &nbsp;•&nbsp; శుభమస్తు &nbsp;•&nbsp; అవిఘ్నమస్తు</div>
+    <div class="tel blessing"><span>శ్రీరస్తు</span><i>•</i><span>శుభమస్తు</span><i>•</i><span>అవిఘ్నమస్తు</span></div>
     <svg class="kalash" viewBox="0 0 100 112" aria-hidden="true" data-icon="kalash"></svg>
     <p class="lead">Together with our families, we joyfully invite you to the wedding of</p>
-    <h1 class="names"><span class="nm" data-name="bride" data-fill="gName"></span><span class="amp">&amp;</span><span class="nm" data-name="groom" data-fill="gName"></span></h1>
+    <h1 class="names couple" data-fill="url(#gName)" data-amp="#0b3d28" data-min="40"></h1>
     <div class="date-band"><div class="side" data-bind="weekday"></div><div class="num" data-bind="dayNum"></div><div class="side" data-bind="monthYear"></div></div>
     <div class="muhurtham">Muhurtham at <b data-bind="muhurthamTime"></b></div>
     <div class="venue-line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 22s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg><span data-bind="venueShort"></span></div>
@@ -503,7 +575,7 @@ button{font:inherit;color:inherit}
         <svg class="lotus-div" data-icon="lotus" viewBox="0 0 180 26"></svg>
       </div>
       <div id="storyText"></div>
-      <div class="signature reveal" data-bind="signature"></div>
+      <div class="signature couple reveal" data-fill="#0a3a26" data-amp="#b8862b" data-min="30"></div>
     </div>
   </div>
 </section>
@@ -527,7 +599,7 @@ button{font:inherit;color:inherit}
       <div class="eyebrow">The Venue</div>
       <h2 class="title">Where to Find Us</h2>
       <svg class="lotus-div" data-icon="lotus" viewBox="0 0 180 26"></svg>
-      <h3 data-bind="venueName"></h3>
+      <h3 class="venue-name"><svg class="pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 22s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg><span data-bind="venueName"></span></h3>
       <address data-bind="venueAddress"></address>
       <div class="actions">
         <a class="btn primary" data-map target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 11l18-8-8 18-2-8z"/></svg>Directions</a>
@@ -546,7 +618,7 @@ button{font:inherit;color:inherit}
     <p class="msg reveal">Your presence and blessings are the most precious gifts we could ask for.</p>
     <div class="diyas reveal d1">
       <svg class="diya" viewBox="0 0 80 80" data-icon="diya"></svg>
-      <h2 class="names"><span class="nm" data-name="bride" data-fill="gNameLight"></span><span class="amp" style="color:var(--gold-l);-webkit-text-fill-color:var(--gold-l)">&amp;</span><span class="nm" data-name="groom" data-fill="gNameLight"></span></h2>
+      <h2 class="names couple" data-fill="url(#gNameLight)" data-amp="#f4d98c" data-min="38"></h2>
       <svg class="diya" viewBox="0 0 80 80" data-icon="diya"></svg>
     </div>
     <div class="when reveal d2" data-bind="dateDots"></div>
@@ -597,7 +669,6 @@ const CONFIG = {
   },
   photo: "",          // optional couple photo, e.g. "assets/couple.jpg" — a monogram shows when empty
   musicUrl: "",       // optional, e.g. "assets/song.mp3" — adds a music button when set
-  signature: "Kiranmayi & Sriharsha",
   story: [
     "What started as a chance encounter soon became endless conversations, shared dreams and countless memories together.",
     "With the blessings of our families, two hearts found their way home to each other.",
@@ -629,8 +700,8 @@ const mapsLink = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIC
 
 /* ---------------- text bindings ---------------- */
 const B = {
-  bride: CONFIG.bride, groom: CONFIG.groom, signature: CONFIG.signature,
-  initials: `${CONFIG.bride[0]} & ${CONFIG.groom[0]}`,
+  bride: CONFIG.bride, groom: CONFIG.groom,
+  initials: `${CONFIG.groom[0]} & ${CONFIG.bride[0]}`,
   weekday: fmt({weekday: 'long'}),
   dayNum: fmt({day: 'numeric'}),
   monthYear: fmt({month: 'short', year: 'numeric'}),
@@ -643,10 +714,7 @@ const B = {
 };
 $$('[data-bind]').forEach(el => el.textContent = B[el.dataset.bind]);
 // script names as SVG text: decorative swashes are never cropped (Safari clips gradient-filled CSS text)
-$$('[data-name]').forEach(el => {
-  const name = CONFIG[el.dataset.name];
-  el.innerHTML = `<svg class="nm-svg" aria-hidden="true"><text x="50%" y="1.04em" text-anchor="middle" fill="url(#${el.dataset.fill})">${name}</text></svg><span class="sr-only">${name}</span>`;
-});
+
 
 /* =========================================================
    ORNAMENTS (all vector, generated here)
@@ -806,8 +874,8 @@ $$('[data-icon]').forEach(el => el.innerHTML = ICONS[el.dataset.icon]);
    ========================================================= */
 $('#storyText').innerHTML = CONFIG.story.map((p, i) => `<p class="reveal d${Math.min(i,3)}">${p}</p>`).join('');
 $('#portrait').innerHTML = CONFIG.photo
-  ? `<img src="${CONFIG.photo}" alt="${CONFIG.bride} and ${CONFIG.groom}" loading="lazy">`
-  : `<div class="mono-m">${MANDALA}</div><div class="mono">${CONFIG.bride[0]}<span style="color:var(--gold);font-size:.6em"> & </span>${CONFIG.groom[0]}</div>`;
+  ? `<img src="${CONFIG.photo}" alt="${CONFIG.groom} and ${CONFIG.bride}" loading="lazy">`
+  : `<div class="mono-m"><div class="mono-wrap">${MANDALA}<div class="mono-box" id="portraitMono"></div></div></div>`;
 
 $('#eventGrid').innerHTML = CONFIG.events.map((e, i) => `
   <article class="event reveal d${i} ${e.featured ? 'featured' : ''}" data-arch>
@@ -817,8 +885,7 @@ $('#eventGrid').innerHTML = CONFIG.events.map((e, i) => `
     <div class="time gold-text">${e.time.replace(/\s*(AM|PM)$/i, ' <span class="ampm">$1</span>')}</div>
     <div class="when">${B.dateLong}</div>
     <p>${e.text}</p>
-    <div class="place">${CONFIG.venue.name}</div>
-    <a class="btn ${e.featured ? 'primary' : 'ghost'}" href="${mapsLink}" target="_blank" rel="noopener">View on Map</a>
+    <div class="place"><svg class="pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 22s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg><span>${CONFIG.venue.name}</span></div>
   </article>`).join('');
 
 $('#cal').innerHTML = [-2,-1,0,1,2].map(k => {
@@ -859,7 +926,7 @@ tick(); setInterval(tick, 1000);
   const z = d => new Date(d).toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z';
   const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//wedding//EN','BEGIN:VEVENT',
     `UID:${M.getTime()}@wedding`,`DTSTAMP:${z(Date.now())}`,`DTSTART:${z(CONFIG.eventStart)}`,`DTEND:${z(CONFIG.eventEnd)}`,
-    `SUMMARY:Wedding of ${CONFIG.bride} & ${CONFIG.groom}`,
+    `SUMMARY:Wedding of ${CONFIG.groom} & ${CONFIG.bride}`,
     `DESCRIPTION:Dinner 7:00 PM · Muhurtham ${B.muhurthamTime}`,
     `LOCATION:${CONFIG.venue.name}\\, ${CONFIG.venue.address.replace(/,/g,'\\,')}`,
     'END:VEVENT','END:VCALENDAR'].join('\r\n');
@@ -869,7 +936,7 @@ tick(); setInterval(tick, 1000);
 
 /* ---------------- share / copy ---------------- */
 function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2200); }
-const shareText = `You're invited to the wedding of ${CONFIG.bride} & ${CONFIG.groom}\n${B.dateLong} · Muhurtham ${B.muhurthamTime}\n${CONFIG.venue.name}, ${CONFIG.venue.city}`;
+const shareText = `You're invited to the wedding of ${CONFIG.groom} & ${CONFIG.bride}\n${B.dateLong} · Muhurtham ${B.muhurthamTime}\n${CONFIG.venue.name}, ${CONFIG.venue.city}`;
 const pageUrl = /^https?:/.test(location.protocol) ? location.href.split('#')[0] : '';
 const fullText = pageUrl ? `${shareText}\n${pageUrl}` : shareText;
 const sheet = $('#sheet');
@@ -943,9 +1010,65 @@ const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting
 $$('.reveal').forEach(el => io.observe(el));
 
 /* ---------------- layout-dependent ornaments ---------------- */
-function layout(){ drawTorans(); drawArches(); }
+// "S & K" monogram, centred on the true outline of the letters (script fonts sit off-centre in their text box)
+function drawMonogram(box, frac, color, ampColor){
+  if (!box) return;
+  const a = CONFIG.groom[0], b = CONFIG.bride[0], str = `${a} & ${b}`;
+  const c = document.createElement('canvas').getContext('2d');
+  c.font = '100px "Great Vibes"';
+  const m = c.measureText(str);
+  const L = m.actualBoundingBoxLeft, R = m.actualBoundingBoxRight, A = m.actualBoundingBoxAscent, D = m.actualBoundingBoxDescent;
+  const k = (frac * 100) / ((L + R) || 100);
+  const x = (-(R - L) / 2) * k, y = ((A - D) / 2) * k;
+  box.innerHTML = `<svg viewBox="-50 -50 100 100" aria-hidden="true"><text x="${x.toFixed(2)}" y="${y.toFixed(2)}" font-size="${(100*k).toFixed(2)}" fill="${color}" style="font-family:'Great Vibes',cursive;white-space:pre">${a}<tspan fill="${ampColor}"> &amp; </tspan>${b}</text></svg>`;
+}
+function drawMonograms(){
+  drawMonogram($('#sealMono'), .54, '#0b3d28', '#0b3d28');
+  drawMonogram($('#portraitMono'), .62, '#0a3a26', '#b8862b');
+}
+// Couple names: one line ("Sriharsha & Kiranmayi") whenever it fits at a good size,
+// otherwise three lines with the "&" centred exactly between the two names.
+// Positions come from the real ink outline of the letters, so nothing is clipped (iOS) or off-centre.
+const _mc = document.createElement('canvas').getContext('2d');
+function ink(text, fs){
+  _mc.font = `${fs}px "Great Vibes"`;
+  const m = _mc.measureText(text);
+  return {L: m.actualBoundingBoxLeft, R: m.actualBoundingBoxRight, A: m.actualBoundingBoxAscent, D: m.actualBoundingBoxDescent};
+}
+function inkLine(markup, plain, fs, W, pad, fill){
+  const m = ink(plain, fs);
+  const x = W / 2 - (m.R - m.L) / 2;                 // centre of the ink at the centre of the box
+  const H = m.A + m.D + 2 * pad;
+  return `<svg class="cp-line" viewBox="0 ${(-m.A - pad).toFixed(1)} ${W} ${H.toFixed(1)}" style="height:${H.toFixed(1)}px" aria-hidden="true">` +
+         `<text x="${x.toFixed(1)}" y="0" font-size="${fs.toFixed(1)}" fill="${fill}">${markup}</text></svg>`;
+}
+function renderCouples(){
+  const a = CONFIG.groom, b = CONFIG.bride;
+  $$('.couple').forEach(el => {
+    const W = Math.floor(el.getBoundingClientRect().width); if (!W) return;
+    const base = parseFloat(getComputedStyle(el).fontSize);
+    const pad = Math.max(4, base * .1), room = W - 2 * pad;
+    const fill = el.dataset.fill, amp = el.dataset.amp, minOne = parseFloat(el.dataset.min || 36);
+    const oneW = (m => m.L + m.R)(ink(`${a} & ${b}`, 100));
+    const fsOne = Math.min(base, room / oneW * 100);
+    let html;
+    if (fsOne >= minOne) {
+      html = inkLine(`${a}<tspan fill="${amp}"> &amp; </tspan>${b}`, `${a} & ${b}`, fsOne, W, pad, fill);
+      el.style.removeProperty('--cp-gap');
+    } else {
+      const wa = (m => m.L + m.R)(ink(a, 100)), wb = (m => m.L + m.R)(ink(b, 100));
+      const fs = Math.min(base, room / Math.max(wa, wb) * 100);
+      html = inkLine(a, a, fs, W, pad, fill) + inkLine('&amp;', '&', fs * .55, W, pad, amp) + inkLine(b, b, fs, W, pad, fill);
+      el.style.setProperty('--cp-gap', (fs * .06).toFixed(1) + 'px');
+    }
+    el.classList.toggle('stacked', fsOne < minOne);
+    el.innerHTML = html + `<span class="sr-only">${a} &amp; ${b}</span>`;
+  });
+}
+function layout(){ drawTorans(); drawArches(); renderCouples(); drawMonograms(); }
 layout();
 (document.fonts ? document.fonts.ready : Promise.resolve()).then(layout);
+if (document.fonts && document.fonts.load) document.fonts.load('100px "Great Vibes"').then(() => { renderCouples(); drawMonograms(); });
 let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(layout, 120); });
 if ('ResizeObserver' in window) { const ro = new ResizeObserver(() => drawArches()); $$('[data-arch]').forEach(el => ro.observe(el)); }
 
