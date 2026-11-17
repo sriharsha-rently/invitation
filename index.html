@@ -628,6 +628,9 @@ body{overflow-wrap:break-word}
 .reveal{backface-visibility:hidden}
 /* map placeholder: nothing heavy loads until the guest asks for it */
 .map{position:relative}
+
+/* script names: never clip the swashes */
+.couple .cp-line,.couple .cp-line text{overflow:visible}
 </style>
 </head>
 <body class="locked">
@@ -1225,12 +1228,33 @@ function inkLine(markup, plain, fs, W, pad, fill){
   return `<svg class="cp-line" viewBox="0 ${(-m.A - pad).toFixed(1)} ${W} ${H.toFixed(1)}" style="height:${H.toFixed(1)}px" aria-hidden="true">` +
          `<text x="${x.toFixed(1)}" y="0" font-size="${fs.toFixed(1)}" fill="${fill}">${markup}</text></svg>`;
 }
+// Safety pass on the real rendered glyphs (some phones measure script fonts differently in canvas):
+// re-centre on the drawn text, shrink if it runs outside, and grow the box so no swash is ever clipped.
+function fitRendered(el, W, pad){
+  $$('svg.cp-line', el).forEach(sv => {
+    const t = sv.querySelector('text'); if (!t) return;
+    let bb; try { bb = t.getBBox(); } catch (e) { return; }
+    if (!bb.width) return;
+    const fs = parseFloat(t.getAttribute('font-size'));
+    const room = W - 2 * pad;
+    if (bb.width > room) {
+      t.setAttribute('font-size', (fs * room / bb.width).toFixed(1));
+      bb = t.getBBox();
+    }
+    const dx = (W - bb.width) / 2 - bb.x;
+    if (Math.abs(dx) > .5) { t.setAttribute('x', (parseFloat(t.getAttribute('x')) + dx).toFixed(1)); bb = t.getBBox(); }
+    const vb = sv.viewBox.baseVal, extra = fs * .12;
+    const top = Math.min(vb.y, bb.y - extra), bot = Math.max(vb.y + vb.height, bb.y + bb.height + extra);
+    sv.setAttribute('viewBox', `0 ${top.toFixed(1)} ${W} ${(bot - top).toFixed(1)}`);
+    sv.style.height = (bot - top).toFixed(1) + 'px';
+  });
+}
 function renderCouples(){
   const a = CONFIG.groom, b = CONFIG.bride;
   $$('.couple').forEach(el => {
     const W = Math.floor(el.getBoundingClientRect().width); if (!W) return;
     const base = parseFloat(getComputedStyle(el).fontSize);
-    const pad = Math.max(4, base * .1), room = W - 2 * pad;
+    const pad = Math.max(8, base * .16), room = W - 2 * pad;
     const fill = el.dataset.fill, amp = el.dataset.amp, minOne = parseFloat(el.dataset.min || 36);
     const oneW = (m => m.L + m.R)(ink(`${a} & ${b}`, 100));
     const fsOne = Math.min(base, room / oneW * 100);
@@ -1247,6 +1271,7 @@ function renderCouples(){
     }
     el.classList.toggle('stacked', !oneLine);
     el.innerHTML = html + `<span class="sr-only">${a} &amp; ${b}</span>`;
+    fitRendered(el, W, pad);
   });
 }
 let _lw = 0;
@@ -1257,6 +1282,7 @@ function layout(force){
 }
 layout(true);
 (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => layout(true));
+addEventListener('load', () => { renderCouples(); setTimeout(renderCouples, 800); });
 if (document.fonts && document.fonts.load) document.fonts.load('100px "Great Vibes"').then(() => { renderCouples(); drawMonograms(); });
 let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => layout(), 150); }, {passive: true});
 if ('ResizeObserver' in window) { const ro = new ResizeObserver(() => drawArches()); $$('[data-arch]').forEach(el => ro.observe(el)); }
