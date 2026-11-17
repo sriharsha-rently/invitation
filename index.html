@@ -110,7 +110,7 @@ button{font:inherit;color:inherit}
    TORAN & GARLANDS
    ========================================================= */
 .toran svg{display:block;width:100%;height:auto;filter:drop-shadow(0 6px 6px rgba(90,40,0,.18))}
-.toran .strand{transform-box:fill-box;transform-origin:top center;animation:swing 5s ease-in-out infinite}
+.toran .strand{animation:none}
 @keyframes swing{0%,100%{transform:rotate(1.6deg)}50%{transform:rotate(-1.6deg)}}
 .jasmine{position:absolute;top:0;z-index:2;width:34px;filter:drop-shadow(0 1px 1.5px rgba(110,70,30,.45));transform-origin:top center;animation:swing 6s ease-in-out infinite;pointer-events:none}
 .jasmine.left{left:max(10px,calc(50% - 560px))}
@@ -393,7 +393,7 @@ button{font:inherit;color:inherit}
    PERFORMANCE
    ========================================================= */
 /* off-screen sections: freeze every decorative animation */
-.idle,.idle *{animation-play-state:paused!important}
+.idle .spark,.idle .heart svg,.idle .pf-mandala svg,.idle .pf-ring,.idle .pf-medal::before,.idle .ev-petals i,.idle .ic svg,.idle .ic::after,.idle .hero-mandala svg,.idle .cd-mandala svg,.idle .cl-mandala svg,.idle .jasmine,.idle .diya .flame,.idle .gold-text,.idle .ring .n,.idle .title,.idle .scroll-cue i{animation-play-state:paused!important}
 /* promote the big rotating mandalas to their own layer so spinning is cheap */
 .hero-mandala svg,.cd-mandala svg,.closing .cl-mandala svg{will-change:transform}
 /* phones: drop the expensive effects that repaint while scrolling */
@@ -615,6 +615,24 @@ body{overflow-wrap:break-word}
 
 /* doors: English title now stands alone */
 .intro-top .sub{font-size:clamp(14px,3.6vw,18px);letter-spacing:.46em;padding-left:.46em;color:var(--gold-l);text-shadow:0 2px 8px rgba(0,0,0,.4)}
+
+/* =========================================================
+   SMOOTH SCROLLING
+   ========================================================= */
+.toran img{display:block;width:100%;height:auto;user-select:none;-webkit-user-drag:none}
+@media (min-width:761px) and (pointer:fine){.toran img{filter:drop-shadow(0 6px 6px rgba(90,40,0,.18))}}
+/* keep each section's repaints inside the section */
+.hero,.countdown,.events,.closing,.story,.venue{contain:paint}
+/* animated layers get their own compositor layer */
+.jasmine,.ev-petals i,.pf-mandala svg,.pf-ring,.spark{will-change:transform}
+.reveal{backface-visibility:hidden}
+/* map placeholder: nothing heavy loads until the guest asks for it */
+.map{position:relative}
+.map-ph{position:absolute;inset:8px;border:0;border-radius:18px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  background:radial-gradient(circle at 50% 40%,#fffaf0,#f7e6c2);color:var(--maroon);font:inherit;transition:opacity .4s}
+.map-ph svg{width:44px;height:44px;color:#b8862b}
+.map-ph .t{font-size:20px}
+.map-ph.gone{opacity:0;pointer-events:none}
 </style>
 </head>
 <body class="locked">
@@ -744,7 +762,7 @@ body{overflow-wrap:break-word}
         <button class="btn ghost" id="copyAddr" type="button">Copy Address</button>
       </div>
     </div>
-    <div class="map reveal d1"><iframe id="mapFrame" title="Venue map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+    <div class="map reveal d1"><iframe id="mapFrame" title="Venue map" referrerpolicy="no-referrer-when-downgrade"></iframe><button class="map-ph" id="mapLoad" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 22s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg><span class="t">Sri Sesha Sai Kalyana Vedika</span><span class="btn primary">Show Map</span></button></div>
   </div>
 </section>
 
@@ -812,10 +830,10 @@ const CONFIG = {
     "Now we begin our greatest journey yet — a lifetime together — and we would love for you to be there."
   ],
   events: [
-    { name: "Dinner", tag: "Wedding Feast", time: "7:00 PM", icon: "leaf",
-      text: "A traditional wedding feast with family and friends." },
     { name: "Muhurtham", tag: "The Wedding", time: "8:26 PM", icon: "kalash", featured: true,
-      text: "The auspicious moment we tie the knot, amidst Vedic chants and the blessings of our elders." }
+      text: "The auspicious moment we tie the knot, amidst Vedic chants and the blessings of our elders." },
+    { name: "Dinner", tag: "Wedding Feast", time: "7:00 PM", icon: "leaf",
+      text: "A traditional wedding feast with family and friends." }
   ]
 };
 
@@ -908,11 +926,25 @@ function toranSVG(W){
   return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">
     ${leaves}<path d="M0 4H${W}" stroke="#a8741a" stroke-width="2.4"/>${strands}${swags}</svg>`;
 }
+// garland → one static image (thousands of vector shapes become a single cached bitmap = smooth scrolling)
+let _defsXML = '';
+function toranImage(W){
+  _defsXML = _defsXML || $('#defs').innerHTML;
+  const svg = toranSVG(W)
+    .replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ')
+    .replace('aria-hidden="true">', `aria-hidden="true"><defs>${_defsXML}</defs>`)
+    .replace(/<use href="([^"]+)"/g, '<use href="$1" xlink:href="$1"')
+    .replace(/ class="strand"[^>]*>/g, '>');
+  const H = +(svg.match(/ height="(\d+)"/) || [0, 150])[1];
+  return {url: URL.createObjectURL(new Blob([svg], {type: 'image/svg+xml'})), H};
+}
 function drawTorans(){
   $$('[data-toran]').forEach(el => {
     const W = Math.round(el.getBoundingClientRect().width || innerWidth);
     if (el._w === W) return; el._w = W;
-    el.innerHTML = toranSVG(W);
+    const {url, H} = toranImage(W);
+    if (el._url) URL.revokeObjectURL(el._url); el._url = url;
+    el.innerHTML = `<img src="${url}" width="${W}" height="${H}" alt="" decoding="async" draggable="false">`;
   });
   const h = $('#heroToran').getBoundingClientRect().height;
   $('#home').style.setProperty('--toran-h', Math.round(h + 10) + 'px');
@@ -1044,7 +1076,10 @@ $('#cal').innerHTML = [-2,-1,0,1,2].map(k => {
 }).join('');
 
 $$('[data-map]').forEach(a => a.href = mapsLink);
-$('#mapFrame').src = 'https://maps.google.com/maps?q=' + encodeURIComponent(CONFIG.venue.mapQuery) + '&z=16&output=embed';
+$('#mapLoad').addEventListener('click', () => {
+  $('#mapFrame').src = 'https://maps.google.com/maps?q=' + encodeURIComponent(CONFIG.venue.mapQuery) + '&z=16&output=embed';
+  $('#mapLoad').classList.add('gone');
+});
 
 /* ---------------- countdown ---------------- */
 const CIRC = 2 * Math.PI * 54;
@@ -1215,11 +1250,16 @@ function renderCouples(){
     el.innerHTML = html + `<span class="sr-only">${a} &amp; ${b}</span>`;
   });
 }
-function layout(){ drawTorans(); drawArches(); renderCouples(); drawMonograms(); }
-layout();
-(document.fonts ? document.fonts.ready : Promise.resolve()).then(layout);
+let _lw = 0;
+function layout(force){
+  if (!force && innerWidth === _lw) return;
+  _lw = innerWidth;
+  drawTorans(); drawArches(); renderCouples(); drawMonograms();
+}
+layout(true);
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => layout(true));
 if (document.fonts && document.fonts.load) document.fonts.load('100px "Great Vibes"').then(() => { renderCouples(); drawMonograms(); });
-let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(layout, 120); });
+let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => layout(), 150); }, {passive: true});
 if ('ResizeObserver' in window) { const ro = new ResizeObserver(() => drawArches()); $$('[data-arch]').forEach(el => ro.observe(el)); }
 
 /* ---------------- intro doors ---------------- */
