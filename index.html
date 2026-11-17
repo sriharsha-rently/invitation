@@ -510,7 +510,7 @@ body{overflow-wrap:break-word}
     <div class="tel">శుభ వివాహం</div>
     <div class="sub">SHUBHA VIVAHAM</div>
     <div class="seal"><div class="mono-box" id="sealMono"></div></div>
-    <div class="names-small couple" data-fill="#ffffff" data-amp="#f4d98c" data-min="26"></div>
+    <div class="names-small couple" data-stack="always" data-fill="#ffffff" data-amp="#f4d98c" data-min="26"></div>
     <div class="tap">TAP TO OPEN</div>
   </div>
 </div>
@@ -528,7 +528,7 @@ body{overflow-wrap:break-word}
     <div class="tel blessing"><span>శ్రీరస్తు</span><i>•</i><span>శుభమస్తు</span><i>•</i><span>అవిఘ్నమస్తు</span></div>
     <svg class="kalash" viewBox="0 0 100 112" aria-hidden="true" data-icon="kalash"></svg>
     <p class="lead">Together with our families, we joyfully invite you to the wedding of</p>
-    <h1 class="names couple" data-fill="url(#gName)" data-amp="#0b3d28" data-min="40"></h1>
+    <h1 class="names couple" data-stack="always" data-fill="url(#gName)" data-amp="#0b3d28" data-min="40"></h1>
     <div class="date-band"><div class="side" data-bind="weekday"></div><div class="num" data-bind="dayNum"></div><div class="side" data-bind="monthYear"></div></div>
     <div class="muhurtham">Muhurtham at <b data-bind="muhurthamTime"></b></div>
     <div class="venue-line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 22s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg><span data-bind="venueShort"></span></div>
@@ -618,7 +618,7 @@ body{overflow-wrap:break-word}
     <p class="msg reveal">Your presence and blessings are the most precious gifts we could ask for.</p>
     <div class="diyas reveal d1">
       <svg class="diya" viewBox="0 0 80 80" data-icon="diya"></svg>
-      <h2 class="names couple" data-fill="url(#gNameLight)" data-amp="#f4d98c" data-min="38"></h2>
+      <h2 class="names couple" data-stack="always" data-fill="url(#gNameLight)" data-amp="#f4d98c" data-min="38"></h2>
       <svg class="diya" viewBox="0 0 80 80" data-icon="diya"></svg>
     </div>
     <div class="when reveal d2" data-bind="dateDots"></div>
@@ -1052,7 +1052,8 @@ function renderCouples(){
     const oneW = (m => m.L + m.R)(ink(`${a} & ${b}`, 100));
     const fsOne = Math.min(base, room / oneW * 100);
     let html;
-    if (fsOne >= minOne) {
+    const oneLine = el.dataset.stack !== "always" && fsOne >= minOne;
+    if (oneLine) {
       html = inkLine(`${a}<tspan fill="${amp}"> &amp; </tspan>${b}`, `${a} & ${b}`, fsOne, W, pad, fill);
       el.style.removeProperty('--cp-gap');
     } else {
@@ -1061,7 +1062,7 @@ function renderCouples(){
       html = inkLine(a, a, fs, W, pad, fill) + inkLine('&amp;', '&', fs * .55, W, pad, amp) + inkLine(b, b, fs, W, pad, fill);
       el.style.setProperty('--cp-gap', (fs * .06).toFixed(1) + 'px');
     }
-    el.classList.toggle('stacked', fsOne < minOne);
+    el.classList.toggle('stacked', !oneLine);
     el.innerHTML = html + `<span class="sr-only">${a} &amp; ${b}</span>`;
   });
 }
