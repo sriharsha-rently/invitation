@@ -388,6 +388,25 @@ button{font:inherit;color:inherit}
 
 /* AM/PM sized to the height of the old-style figures so the time reads level */
 .ampm{font-size:.62em;letter-spacing:.06em;margin-left:.12em}
+
+/* =========================================================
+   PERFORMANCE
+   ========================================================= */
+/* off-screen sections: freeze every decorative animation */
+.idle,.idle *{animation-play-state:paused!important}
+/* promote the big rotating mandalas to their own layer so spinning is cheap */
+.hero-mandala svg,.cd-mandala svg,.closing .cl-mandala svg{will-change:transform}
+/* phones: drop the expensive effects that repaint while scrolling */
+@media (max-width:760px),(pointer:coarse){
+  .hero-mandala svg,.cd-mandala svg,.closing .cl-mandala svg{animation:none;will-change:auto}
+  .toran svg,.ring svg,.heart svg{filter:none}
+  .gold-text,.ring .n,.countdown .title,.closing .title{animation:none}
+  .ring .n.pop{animation:pop .55s var(--ease)}
+  .dock{backdrop-filter:none;-webkit-backdrop-filter:none;background:#fffaf1}
+  .sheet-bg{backdrop-filter:none}
+  .tap{backdrop-filter:none}
+  .spark{animation-duration:4s}
+}
 </style>
 </head>
 <body class="locked">
@@ -886,9 +905,9 @@ musicBtn.addEventListener('click', () => { audio.paused ? audio.play() : audio.p
 /* ---------------- petals ---------------- */
 const Petals = (function(){
   const cv = $('#petals'), ctx = cv.getContext('2d'), cols = ['#f76707','#fab005','#ff922b','#ffd43b','#ffffff','#e64980'];
-  let P = [], W, H, running = false, ambient = true;
+  let P = [], W, H, running = false, ambient = true, started = false, sized = false;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function size(){ const dpr = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W*dpr; cv.height = H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
+  function size(){ const dpr = Math.min(innerWidth < 760 ? 1.5 : 2, devicePixelRatio || 1); if (W === innerWidth && H) return; W = innerWidth; H = Math.max(innerHeight, screen.height || 0); cv.width = W*dpr; cv.height = H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
   function make(x, y, vx, vy){ return {x, y, vx, vy, r: 5 + Math.random()*6, a: Math.random()*6.28, va: (Math.random()-.5)*.12, sw: Math.random()*6.28, c: cols[Math.random()*cols.length|0]}; }
   function loop(){
     ctx.clearRect(0,0,W,H);
@@ -900,15 +919,24 @@ const Petals = (function(){
       ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.fillStyle = p.c; ctx.globalAlpha = .9;
       ctx.beginPath(); ctx.ellipse(0, 0, p.r, p.r*.55, 0, 0, 6.283); ctx.fill(); ctx.restore();
     }
+    // nothing left to draw and no new petals wanted: stop the loop until needed again
+    if (!ambient && !P.length) { running = false; ctx.clearRect(0,0,W,H); return; }
     if (running) requestAnimationFrame(loop);
   }
   return {
-    start(){ if (reduce || running) return; size(); running = true; addEventListener('resize', size); loop(); },
-    burst(){ if (reduce || !running) return; for (let i = 0; i < (W < 700 ? 70 : 120); i++) { const a = Math.random()*6.28, s = 3 + Math.random()*7; P.push(make(W/2, H*.45, Math.cos(a)*s, Math.sin(a)*s - 3)); } },
-    set ambient(v){ ambient = v; }
+    start(){ if (reduce || running) return; started = true; size(); running = true; if (!sized) { sized = true; addEventListener('resize', size); } loop(); },
+    burst(){ if (reduce || !started) return; if (!running) { running = true; requestAnimationFrame(loop); } for (let i = 0; i < (W < 700 ? 70 : 120); i++) { const a = Math.random()*6.28, s = 3 + Math.random()*7; P.push(make(W/2, H*.45, Math.cos(a)*s, Math.sin(a)*s - 3)); } },
+    set ambient(v){ ambient = v; if (v && started && !running && !reduce) { running = true; loop(); } }
   };
 })();
 new IntersectionObserver(([e]) => Petals.ambient = e.isIntersecting, {threshold: .1}).observe($('#home'));
+
+/* ---------------- pause ornaments that are off-screen ---------------- */
+(function(){
+  const secs = $$('header.hero, section, footer.closing');
+  const vis = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('idle', !e.isIntersecting)), {rootMargin: '120px 0px'});
+  secs.forEach(el => { el.classList.add('idle'); vis.observe(el); });
+})();
 
 /* ---------------- reveal on scroll ---------------- */
 const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold: .12, rootMargin: '0px 0px -30px 0px'});
